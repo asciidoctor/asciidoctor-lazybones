@@ -1,0 +1,7 @@
+= Asciidoctor Lazybones templates
+
+Asciidoctor lazybones templates are a set of templates used to generate Gradle based projects using https://github.com/pledbrook/lazybones/[lazybones].
+
+For Asciidoctor, it consists on generating slideshows using asciidoctor backends such as RevealJS.
+
+  
