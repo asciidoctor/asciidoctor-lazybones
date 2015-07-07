@@ -32,7 +32,7 @@ apply plugin: 'uk.co.cacoethes.lazybones-templates'
 apply plugin: 'com.github.ben-manes.versions'
 
 lazybones {
-    repositoryName = 'asciidoctor/maven'
+    repositoryName = 'gscheibel/asciidoctor-lazybones'
     repositoryUsername = project.bintrayUsername
     repositoryApiKey = project.bintrayApiKey
     licenses = ['MIT']
