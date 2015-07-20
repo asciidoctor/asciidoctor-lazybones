@@ -1,0 +1,90 @@
+import org.ajoberstar.grgit.*
+
+buildscript {
+  repositories {
+    jcenter()
+  }
+
+  dependencies {
+    classpath 'uk.co.cacoethes:lazybones-gradle:1.2.3'
+    classpath 'org.asciidoctor:asciidoctor-gradle-plugin:1.5.2'
+    classpath 'com.github.jruby-gradle:jruby-gradle-plugin:0.1.5'
+    classpath 'org.ysb33r.gradle:vfs-gradle-plugin:1.0-beta1'
+    classpath 'commons-httpclient:commons-httpclient:3.1'
+    classpath 'com.bluepapa32:gradle-watch-plugin:0.1.4'
+    classpath 'org.ajoberstar:gradle-git:1.1.0'
+  }
+}
+
+apply plugin: 'com.github.jruby-gradle.base'
+apply plugin: 'org.ysb33r.vfs'
+apply plugin: 'java'
+apply plugin: 'org.asciidoctor.convert'
+apply plugin: 'com.bluepapa32.watch'
+apply plugin: 'uk.co.cacoethes.lazybones-templates'
+
+version = '1.0.0'
+
+ext {
+  deckjs_version = '1.1.0'
+  deckjsDir = new File(buildDir, 'deck.js')
+  adocDeckjsDir = new File(buildDir, 'asciidoctor-deck.js')
+}
+
+repositories {
+  jcenter()
+}
+
+dependencies {
+  gems 'rubygems:asciidoctor-diagram:1.3.0.preview.3'
+  gems 'rubygems:haml:4.0.6'
+  gems 'rubygems:thread_safe:0.3.4'
+}
+
+task download << {
+  mkdir buildDir
+  vfs {
+    cp "zip:https://github.com/imakewebthings/deck.js/archive/"+deckjs_version+".zip!deck.js-"+deckjs_version, deckjsDir, recursive: true, overwrite: true
+  }
+
+  if(!adocDeckjsDir.exists()) {
+   Grgit.clone(dir: adocDeckjsDir, uri: 'https://github.com/asciidoctor/asciidoctor-deck.js')
+ }
+}
+
+asciidoctor {
+  if( !buildDir.exists() ) {
+    dependsOn jrubyPrepareGems
+    dependsOn download
+  }
+
+  gemPath = jrubyPrepareGems.outputDir
+  requires = ['asciidoctor-diagram']
+  sources {
+    include 'slides.adoc'
+  }
+  resources {
+    from(sourceDir) {
+      include 'images/**'
+      include 'styles/**'
+      include 'snippets/**'
+    }
+    from(buildDir) {
+      include 'deck.js/**'
+      include 'asciidoctor-deck.js/**'
+    }
+  }
+
+  attributes 'sourcedir': project.sourceSets.main.java.srcDirs[0],
+              imagesoutdir: 'images',
+              deckjs_theme: '${deckjsTheme}'
+
+  options template_dirs: [new File(adocDeckjsDir, 'templates/haml').absolutePath]
+}
+
+watch {
+  asciidoc {
+    files fileTree(dir: 'src')
+    tasks 'asciidoctor'
+  }
+}

@@ -1,0 +1,4 @@
+= ${title}
+${author}
+:imagesdir: images
+:sourcedir: snippets
