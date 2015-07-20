@@ -53,7 +53,11 @@ task download << {
 }
 
 asciidoctor {
-  dependsOn jrubyPrepareGems
+  if( !buildDir.exists() ) {
+    dependsOn jrubyPrepareGems
+    dependsOn download
+  }
+
   gemPath = jrubyPrepareGems.outputDir
   requires = ['asciidoctor-diagram']
   sources {
@@ -76,8 +80,6 @@ asciidoctor {
               revealjs_theme: '${revealjsTheme}'
 
   options template_dirs: [new File(adocRevealjsDir, 'templates/slim').absolutePath]
-
-  dependsOn download
 }
 
 watch {
